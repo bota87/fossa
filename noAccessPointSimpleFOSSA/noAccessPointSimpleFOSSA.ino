@@ -1,34 +1,7 @@
 
 // FOSSA NO ACCESS POINT, SIMPLE
 
-//============================//
-//============EDIT============//
-//============================//
-
-#define BTN1 39 //Screen tap button
-
-#define RX1 32 //Bill acceptor
-#define TX1 33 //Bill acceptor
-
-#define TX2 4 //Coinmech
-#define INHIBITMECH 2 //Coinmech
-
-
-// LNURLDevices ATM details
-String baseURLATM = "https://legend.lnbits.com/lnurldevice/api/v1/lnurl/M8wiiij8oLEgK6RNXLvoFs";
-String secretATM = "3czaYALeuAp4H36tH3nasH";
-String currencyATM = "USD";
-
-// Coin and Bill Acceptor amounts
-int billAmountInt[3] = {5,10,20};
-float coinAmountFloat[6] = {0.02, 0.05, 0.1, 0.2, 0.5, 1};
-int charge = 10; // % you will charge people for service, set in LNbits extension
-int maxamount = 30; // max amount per withdraw
-
-//============================//
-//============================//
-//============================//
-
+#include "Config.h"
 #include <Hash.h>
 #include "qrcoded.h"
 #include "Bitcoin.h"
