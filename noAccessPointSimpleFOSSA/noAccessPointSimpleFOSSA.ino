@@ -8,46 +8,45 @@
 
 String qrData;
 
-int bills;
-float coins;
 float total;
 
-int billAmountSize = sizeof(billAmountInt) / sizeof(int);
-float coinAmountSize = sizeof(coinAmountFloat) / sizeof(float);
-
 int moneyTimer = 0;
-    
+
 #include <Wire.h>
 #include <TFT_eSPI.h>
 #include <HardwareSerial.h>
 #include <JC_Button.h>
 
-HardwareSerial SerialPort1(1);
 HardwareSerial SerialPort2(2);
 
 TFT_eSPI tft = TFT_eSPI();
 Button BTNA(BTN1);
 
-void setup()  
-{  
+void setup()
+{
+  Serial.begin(115200);
+  Serial.println("La fossa è sveglia");
+  Serial.println("charge " + String(charge));
+  Serial.println("maxamount " + String(maxamount));
   BTNA.begin();
-  
+
   tft.init();
   tft.setRotation(1);
   tft.invertDisplay(false);
-  
-  SerialPort1.begin(300, SERIAL_8N2, TX1, RX1);
-  SerialPort2.begin(4800, SERIAL_8N1, TX2);
 
-  pinMode(INHIBITMECH, OUTPUT); 
+  SerialPort2.begin(4800, SERIAL_8N1, TX2);
+  Serial.println("Gettoniera connessa su IO " + String(TX2));
+
+  pinMode(INHIBITMECH, OUTPUT);
+  Serial.println("Controllo abilitazione gettoniera su IO " + String(INHIBITMECH));
 }
 
 void loop()
 {
   // Turn on machines
-  SerialPort1.write(184);
-  digitalWrite(INHIBITMECH, HIGH);
-  
+  digitalWrite(INHIBITMECH, LOW);
+  Serial.println("Gettoniera abilitata");
+
   tft.fillScreen(TFT_BLACK);
   printMessage("Feed me FIAT", String(charge) + "% charge", "", TFT_WHITE, TFT_BLACK);
   moneyTimerFun();
@@ -97,54 +96,36 @@ void qrShowCodeLNURL(String message)
   tft.setTextSize(2);
   tft.setTextColor(TFT_BLACK, TFT_WHITE);
   tft.println(message);
-  
-  bool waitForTap = true;
-  while(waitForTap){
+
+  while (true)
+  {
     BTNA.read();
-    if (BTNA.wasReleased()) {
-      waitForTap = false;
-    }
+    if (BTNA.wasReleased())
+      break;
   }
 }
 
 void moneyTimerFun()
 {
-  bool waitForTap = true;
-  coins = 0;
-  bills = 0;
   total = 0;
   printMessage("Feed me fiat", String(charge) + "% charge", "", TFT_WHITE, TFT_BLACK);
-  while( waitForTap || total == 0){
-    if (SerialPort1.available()) {
-      int x = SerialPort1.read();
-       for (int i = 0; i < billAmountSize; i++){
-         if((i+1) == x){
-           bills = bills + billAmountInt[i];
-           total = (coins + bills);
-           printMessage(billAmountInt[i] + currencyATM, "Total: " + String(total) + currencyATM, "TAP SCREEN WHEN FINISHED", TFT_WHITE, TFT_BLACK);
-         }
-       }
-    }
-    if (SerialPort2.available()) {
-      int x = SerialPort2.read();
-      for (int i = 0; i < coinAmountSize; i++){
-         if((i+1) == x){
-           coins = coins + coinAmountFloat[i];
-           total = (coins + bills);
-           printMessage(coinAmountFloat[i] + currencyATM, "Total: " + String(total) + currencyATM, "TAP SCREEN WHEN FINISHED", TFT_WHITE, TFT_BLACK);
-         }
-       }
+  while (true)
+  {
+    if (SerialPort2.available())
+    {
+      float coin = (float)SerialPort2.read() / 100;
+      Serial.println("Inserita moneta da " + String(coin));
+      total = total + coin;
+      printMessage(String(coin) + " " + currencyATM, "Total: " + String(total) + " " + currencyATM, "TAP SCREEN WHEN FINISHED", TFT_WHITE, TFT_BLACK);
     }
     BTNA.read();
-    if (BTNA.wasReleased() || total > maxamount) {
-      waitForTap = false;
-    }
+    if (total >= maxamount || (total > 0 && BTNA.wasReleased()))
+      break;
   }
-  total = (coins + bills) * 100;
 
   // Turn off machines
-  SerialPort1.write(185);
-  digitalWrite(INHIBITMECH, LOW);
+  digitalWrite(INHIBITMECH, HIGH);
+  Serial.println("Gettoniera disabilitata");
 }
 
 void to_upper(char *arr)
@@ -175,20 +156,22 @@ void makeLNURL()
 
   byte payload[51]; // 51 bytes is max one can get with xor-encryption
 
-    size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)secretATM.c_str(), secretATM.length(), nonce, sizeof(nonce), randomPin, float(total));
-    String preparedURL = baseURLATM + "?atm=1&p=";
-    preparedURL += toBase64(payload, payload_len, BASE64_URLSAFE | BASE64_NOPADDING);
-    
+  total = total * 100;
+  size_t payload_len = xor_encrypt(payload, sizeof(payload), (uint8_t *)secretATM.c_str(), secretATM.length(), nonce, sizeof(nonce), randomPin, float(total));
+  String preparedURL = baseURLATM + "?atm=1&p=";
+  preparedURL += toBase64(payload, payload_len, BASE64_URLSAFE | BASE64_NOPADDING);
+
   Serial.println(preparedURL);
   char Buf[200];
   preparedURL.toCharArray(Buf, 200);
   char *url = Buf;
   byte *data = (byte *)calloc(strlen(url) * 2, sizeof(byte));
   size_t len = 0;
-  int res = convert_bits(data, &len, 5, (byte *) url, strlen(url), 8, 1);
-  char *charLnurl = (char *) calloc(strlen(url) * 2, sizeof(byte));
+  int res = convert_bits(data, &len, 5, (byte *)url, strlen(url), 8, 1);
+  char *charLnurl = (char *)calloc(strlen(url) * 2, sizeof(byte));
   bech32_encode(charLnurl, "lnurl", data, len);
   to_upper(charLnurl);
+  // qrData = "lightning://" + String(charLnurl);
   qrData = charLnurl;
 }
 
@@ -224,7 +207,7 @@ int xor_encrypt(uint8_t *output, size_t outlen, uint8_t *key, size_t keylen, uin
   uint8_t hmacresult[32];
   SHA256 h;
   h.beginHMAC(key, keylen);
-  h.write((uint8_t *) "Round secret:", 13);
+  h.write((uint8_t *)"Round secret:", 13);
   h.write(nonce, nonce_len);
   h.endHMAC(hmacresult);
   for (int i = 0; i < payload_len; i++)
@@ -234,7 +217,7 @@ int xor_encrypt(uint8_t *output, size_t outlen, uint8_t *key, size_t keylen, uin
 
   // add hmac to authenticate
   h.beginHMAC(key, keylen);
-  h.write((uint8_t *) "Data:", 5);
+  h.write((uint8_t *)"Data:", 5);
   h.write(output, cur);
   h.endHMAC(hmacresult);
   memcpy(output + cur, hmacresult, 8);
