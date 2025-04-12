@@ -3,7 +3,7 @@
 
 #include "Config.h"
 #include <Hash.h>
-#include "qrcoded.h"
+#include "qrcode.h"
 #include "Bitcoin.h"
 
 String qrData;
