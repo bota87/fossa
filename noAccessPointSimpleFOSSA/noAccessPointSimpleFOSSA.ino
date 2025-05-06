@@ -3,19 +3,18 @@
 
 #include "Config.h"
 #include <Hash.h>
-#include "qrcode.h"
-#include "Bitcoin.h"
+#include <qrcode.h>
+#include <Bitcoin.h>
+#include <Wire.h>
+#include <TFT_eSPI.h>
+#include <HardwareSerial.h>
+#include <JC_Button.h>
 
 String qrData;
 
 float total;
 
 int moneyTimer = 0;
-
-#include <Wire.h>
-#include <TFT_eSPI.h>
-#include <HardwareSerial.h>
-#include <JC_Button.h>
 
 HardwareSerial SerialPort2(2);
 
@@ -34,8 +33,8 @@ void setup()
   tft.setRotation(1);
   tft.invertDisplay(false);
 
-  SerialPort2.begin(4800, SERIAL_8N1, TX2);
-  Serial.println("Gettoniera connessa su IO " + String(TX2));
+  SerialPort2.begin(4800, SERIAL_8N1, gettoniera_TX2);
+  Serial.println("Gettoniera connessa su IO " + String(gettoniera_TX2));
 
   pinMode(INHIBITMECH, OUTPUT);
   Serial.println("Controllo abilitazione gettoniera su IO " + String(INHIBITMECH));
@@ -47,8 +46,6 @@ void loop()
   digitalWrite(INHIBITMECH, LOW);
   Serial.println("Gettoniera abilitata");
 
-  tft.fillScreen(TFT_BLACK);
-  printMessage("Feed me FIAT", String(charge) + "% charge", "", TFT_WHITE, TFT_BLACK);
   moneyTimerFun();
   makeLNURL();
   qrShowCodeLNURL("SCAN ME. TAP SCREEN WHEN FINISHED");
