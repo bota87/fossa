@@ -93,6 +93,8 @@ void qrShowCodeLNURL(String message)
   tft.setTextSize(2);
   tft.setTextColor(TFT_BLACK, TFT_WHITE);
   tft.println(message);
+  
+  delay(5000); // aspetto 5 secondi per evitare che l'utente clicchi inavvertitamente prima di scansionare il qr code
 
   while (true)
   {
