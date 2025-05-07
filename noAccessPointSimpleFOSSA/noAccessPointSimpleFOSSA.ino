@@ -34,8 +34,8 @@ void setup()
   tft.setRotation(1);
   tft.invertDisplay(false);
 
-  SerialPort2.begin(4800, SERIAL_8N1, TX2);
-  Serial.println("Gettoniera connessa su IO " + String(TX2));
+  SerialPort2.begin(4800, SERIAL_8N1, gettoniera_TX2);
+  Serial.println("Gettoniera connessa su IO " + String(gettoniera_TX2));
 
   pinMode(INHIBITMECH, OUTPUT);
   Serial.println("Controllo abilitazione gettoniera su IO " + String(INHIBITMECH));
