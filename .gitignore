@@ -4,3 +4,6 @@ build
 .venv
 .cache
 fossa/hardcoded_user_config.h
+.pio
+.vscode
+noAccessPointSimpleFOSSA

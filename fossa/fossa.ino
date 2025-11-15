@@ -6,7 +6,7 @@
 #include <JC_Button.h>
 #include <Hash.h>
 #include <ArduinoJson.h>
-#include "qrcoded.h"
+#include "qrcode.h"
 #include "Bitcoin.h"
 #include <Adafruit_Thermal.h>
 #include "mbedtls/aes.h"
@@ -14,18 +14,6 @@
 #include <TFT_eSPI.h>
 #define FORMAT_ON_FAIL true
 #define PARAM_FILE "/elements.json"
-
-///////////////////////////////////////////////////
-//////CHANGE MANUALLY OR USE FOSSA.lnbits.com//////
-///////////////////////////////////////////////////
-
-#define BTN1 39        // Screen tap button
-#define BILL_RX 32     // RX Bill acceptor
-#define BILL_TX 33     // TX Bill acceptor
-#define COIN_TX 4      // TX Coinmech
-#define COIN_INHIBIT 2 // Coinmech
-#define PRINTER_RX 22  // RX of the thermal printer
-#define PRINTER_TX 23  // TX of the thermal printer
 
 // default settings
 #include "hardcoded_user_config.h"
