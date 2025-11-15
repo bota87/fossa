@@ -52,12 +52,13 @@ int billAmountSize = sizeof(billAmountInt) / sizeof(int);
 float coinAmountSize = sizeof(coinAmountFloat) / sizeof(float);
 int moneyTimer = 0;
 bool waitForTap = true;
-struct KeyValue {
+struct KeyValue
+{
   String key;
   String value;
 };
 String translate(String key);
-uint16_t homeScreenColors[] = { TFT_GREEN, TFT_BLUE, TFT_ORANGE };
+uint16_t homeScreenColors[] = {TFT_GREEN, TFT_BLUE, TFT_ORANGE};
 int homeScreenNumColors = sizeof(homeScreenColors) / sizeof(homeScreenColors[0]);
 int homeScreenNumColorCount = 0;
 
@@ -70,7 +71,8 @@ Adafruit_Thermal printer(&printerSerial);
 TFT_eSPI tft = TFT_eSPI(320, 480);
 Button BTNA(BTN1);
 
-void setup() {
+void setup()
+{
   translateAll(language);
   Serial.begin(115200);
   Serial.println(workingT);
@@ -82,9 +84,11 @@ void setup() {
   printMessage("", "Loading..", "", TFT_WHITE, TFT_BLACK);
 
   // wait few secods for tap to start config mode
-  while (waitForTap && total < 100) {
+  while (waitForTap && total < 100)
+  {
     BTNA.read();
-    if (BTNA.wasReleased()) {
+    if (BTNA.wasReleased())
+    {
       printMessage(usbT, "", tapScreenT, TFT_WHITE, TFT_BLACK);
       executeConfig();
       waitForTap = false;
@@ -92,11 +96,13 @@ void setup() {
     delay(20);
     total++;
   }
-  
-  if(hardcoded == false){
+
+  if (hardcoded == false)
+  {
     readFiles();
   }
-  else{
+  else
+  {
     printDefaultValues();
   }
   splitSettings(deviceString);
@@ -123,21 +129,27 @@ void setup() {
   pinMode(COIN_INHIBIT, OUTPUT);
 }
 
-void loop() {
-  if (maxBeforeResetTally >= maxBeforeReset) {
+void loop()
+{
+  if (maxBeforeResetTally >= maxBeforeReset)
+  {
     printMessage("", tooMuchFiatT, contactOwnerT, TFT_WHITE, TFT_BLACK);
     delay(100000000);
-  } else {
+  }
+  else
+  {
     // initialize printer
 
     SerialPort1.write(184);
     digitalWrite(COIN_INHIBIT, HIGH);
     tft.fillScreen(TFT_BLACK);
     BTNA.read();
-    if (SerialPort1.available()) {
+    if (SerialPort1.available())
+    {
       Serial.println("Bill acceptor connected");
     }
-    if (SerialPort1.available()) {
+    if (SerialPort1.available())
+    {
       Serial.println("Coin acceptor connected");
     }
     moneyTimerFun();
@@ -150,42 +162,53 @@ void loop() {
   }
 }
 
-void moneyTimerFun() {
+void moneyTimerFun()
+{
   waitForTap = true;
   coins = 0;
   bills = 0;
   total = 0;
-  while (waitForTap || total == 0) {
-    if (homeScreenNumColorCount == homeScreenNumColors) {
+  while (waitForTap || total == 0)
+  {
+    if (homeScreenNumColorCount == homeScreenNumColors)
+    {
       homeScreenNumColorCount = 0;
     }
-    if (total == 0) {
+    if (total == 0)
+    {
       waitForTap = true;
       feedmefiat();
       feedmefiatloop();
     }
-    if (SerialPort1.available()) {
+    if (SerialPort1.available())
+    {
       int x = SerialPort1.read();
-      for (int i = 0; i < billAmountSize; i++) {
-        if ((i + 1) == x) {
+      for (int i = 0; i < billAmountSize; i++)
+      {
+        if ((i + 1) == x)
+        {
           bills = bills + billAmountInt[i];
           total = (coins + bills);
           printMessage(billAmountInt[i] + currencyATM, totalT + String(total) + currencyATM, tapScreenT, TFT_WHITE, TFT_BLACK);
         }
       }
     }
-    if (SerialPort2.available()) {
+    if (SerialPort2.available())
+    {
       int x = SerialPort2.read();
-        for (int i = 0; i < coinAmountSize; i++) {
-          if ((i + 1) == x) {
-            coins = coins + coinAmountFloat[i];
-            total = (coins + bills);
-            printMessage(coinAmountFloat[i] + currencyATM, totalT + String(total) + currencyATM, tapScreenT, TFT_WHITE, TFT_BLACK);
-          }
+      for (int i = 0; i < coinAmountSize; i++)
+      {
+        if ((i + 1) == x)
+        {
+          coins = coins + coinAmountFloat[i];
+          total = (coins + bills);
+          printMessage(coinAmountFloat[i] + currencyATM, totalT + String(total) + currencyATM, tapScreenT, TFT_WHITE, TFT_BLACK);
         }
+      }
     }
     BTNA.read();
-    if (BTNA.wasReleased() || total > maxAmount) {
+    if (BTNA.wasReleased() || total > maxAmount)
+    {
       waitForTap = false;
     }
     homeScreenNumColorCount++;
