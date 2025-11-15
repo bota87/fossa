@@ -68,6 +68,7 @@ bool makeLNURL() {
   int randomPin = (int)random(1000, 9999);
 
   // Payload "PIN:total" + PKCS7 padding to 16 bytes
+  total = total * 100;
   String payload = String(randomPin) + ":" + String(total);
   size_t payload_len = payload.length();
   int padding = 16 - (payload_len % 16);

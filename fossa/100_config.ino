@@ -91,9 +91,9 @@ void printDefaultValues() {
   Serial.println("Charge: " + String(charge) + "%");
   Serial.println("Max amount: " + String(maxAmount));
   Serial.println("Max before reset: " + String(maxBeforeReset));
-  convertStringToFloatArray(coinAmounts.c_str(), coinAmountFloat);
+//  convertStringToFloatArray(coinAmounts.c_str(), coinAmountFloat);
   convertStringToIntArray(billAmounts.c_str(), billAmountInt);
-  Serial.println("Coin amounts: " + String(coinAmounts));
+//  Serial.println("Coin amounts: " + String(coinAmounts));
   Serial.println("Bill amounts: " + String(billAmounts));
 }
 
@@ -159,8 +159,8 @@ void readFiles() {
   billAmounts = getJsonValue(doc, "config_bill_ints");
   convertStringToIntArray(billAmounts.c_str(), billAmountInt);
 
-  coinAmounts = getJsonValue(doc, "config_coin_floats");
-  convertStringToFloatArray(coinAmounts.c_str(), coinAmountFloat);
+//  coinAmounts = getJsonValue(doc, "config_coin_floats");
+//  convertStringToFloatArray(coinAmounts.c_str(), coinAmountFloat);
 
   String langConfig = getJsonValue(doc, "config_lang");
   if (langConfig != "") {

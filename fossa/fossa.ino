@@ -21,7 +21,7 @@
 bool hardcoded = HARDCODED; // set to true if you want to use the above hardcoded settings
 bool printerBool = false;
 int billAmountInt[10];
-float coinAmountFloat[6];
+// float coinAmountFloat[6];
 
 ///////////////////////////////////////////////////
 ///////////////////////////////////////////////////
@@ -29,7 +29,7 @@ float coinAmountFloat[6];
 
 String deviceString = DEVICE_STRING;
 String language = LANGUAGE;
-String coinAmounts = COIN_AMOUNTS;
+// String coinAmounts = COIN_AMOUNTS;
 String billAmounts = BILL_AMOUNTS;
 int charge = CHARGE;
 int maxAmount = MAX_AMOUNT;
@@ -44,12 +44,12 @@ fs::SPIFFSFS &FlashFS = SPIFFS;
 
 String qrData;
 
-int maxBeforeResetTally;
+float maxBeforeResetTally;
 int bills;
 float coins;
 float total;
 int billAmountSize = sizeof(billAmountInt) / sizeof(int);
-float coinAmountSize = sizeof(coinAmountFloat) / sizeof(float);
+// float coinAmountSize = sizeof(coinAmountFloat) / sizeof(float);
 int moneyTimer = 0;
 bool waitForTap = true;
 struct KeyValue
@@ -84,18 +84,18 @@ void setup()
   printMessage("", "Loading..", "", TFT_WHITE, TFT_BLACK);
 
   // wait few secods for tap to start config mode
-  while (waitForTap && total < 100)
-  {
-    BTNA.read();
-    if (BTNA.wasReleased())
-    {
-      printMessage(usbT, "", tapScreenT, TFT_WHITE, TFT_BLACK);
-      executeConfig();
-      waitForTap = false;
-    }
-    delay(20);
-    total++;
-  }
+  //  while (waitForTap && total < 100)
+  //  {
+  //    BTNA.read();
+  //    if (BTNA.wasReleased())
+  //    {
+  //      printMessage(usbT, "", tapScreenT, TFT_WHITE, TFT_BLACK);
+  //      executeConfig();
+  //      waitForTap = false;
+  //    }
+  //    delay(20);
+  //    total++;
+  //  }
 
   if (hardcoded == false)
   {
@@ -141,21 +141,21 @@ void loop()
     // initialize printer
 
     SerialPort1.write(184);
-    digitalWrite(COIN_INHIBIT, HIGH);
+    digitalWrite(COIN_INHIBIT, LOW);
     tft.fillScreen(TFT_BLACK);
-    BTNA.read();
+    // BTNA.read();
     if (SerialPort1.available())
     {
       Serial.println("Bill acceptor connected");
     }
-    if (SerialPort1.available())
+    if (SerialPort2.available())
     {
       Serial.println("Coin acceptor connected");
     }
     moneyTimerFun();
     Serial.println(total);
     Serial.println(maxBeforeResetTally);
-    maxBeforeResetTally = maxBeforeResetTally + (total / 100);
+    maxBeforeResetTally = maxBeforeResetTally + total;
     Serial.println(maxBeforeResetTally);
     makeLNURL();
     qrShowCodeLNURL(scanMeT);
@@ -196,26 +196,22 @@ void moneyTimerFun()
     if (SerialPort2.available())
     {
       int x = SerialPort2.read();
-      for (int i = 0; i < coinAmountSize; i++)
-      {
-        if ((i + 1) == x)
-        {
-          coins = coins + coinAmountFloat[i];
-          total = (coins + bills);
-          printMessage(coinAmountFloat[i] + currencyATM, totalT + String(total) + currencyATM, tapScreenT, TFT_WHITE, TFT_BLACK);
-        }
-      }
+      float coin = x / 100.0; // Coin acceptor sends coin value in cents
+      Serial.println("Inserita moneta da " + String(coin));
+      coins = coins + coin;
+      total = (coins + bills);
+      printMessage(String(coin) + " " + currencyATM, totalT + " " + String(total) + " " + currencyATM, tapScreenT, TFT_WHITE, TFT_BLACK);
     }
     BTNA.read();
-    if (BTNA.wasReleased() || total > maxAmount)
+    if (BTNA.wasReleased() || total >= maxAmount)
     {
       waitForTap = false;
     }
     homeScreenNumColorCount++;
   }
-  total = (coins + bills) * 100;
+  // total = (coins + bills) * 100;
 
   // Turn off machines
   SerialPort1.write(185);
-  digitalWrite(COIN_INHIBIT, LOW);
+  digitalWrite(COIN_INHIBIT, HIGH);
 }
